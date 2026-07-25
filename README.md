@@ -87,17 +87,47 @@ Each app is an independent OAuth connection that grants only the access it needs
 
 ## Deployment (Vercel)
 
-`vercel.json` configures the Vite build, SPA rewrites, and asset caching.
+`vercel.json` already configures the Vite build, SPA rewrites, and asset
+caching, so no build settings need to be entered by hand. The SPA rewrite is
+what keeps a hard refresh on `/chat` or `/integrations` from 404ing.
 
 ```bash
 npm i -g vercel
 vercel login
+vercel link          # or import the repo from the Vercel dashboard
 vercel --prod
 ```
 
-Then, in the Vercel dashboard, add `VITE_DEMO_EMAIL` and `VITE_DEMO_PASSWORD` for Production and redeploy.
+**Project settings** — if importing through the dashboard, set the root
+directory to the repository root and leave the framework as Vite.
 
-On the backend side, the deployed frontend origin must be added to `ALLOWED_ORIGINS`, and `FRONTEND_URL` must point at it so OAuth callbacks land back on the app.
+**Environment variables** (Settings → Environment Variables, Production):
+
+| Variable | Value |
+|---|---|
+| `VITE_API_URL` | Backend origin, e.g. `https://nexflow-2-0-backend.onrender.com`. Already in `.env.production`; set it here too if you want to override per-environment. |
+| `VITE_DEMO_EMAIL` | Demo account email |
+| `VITE_DEMO_PASSWORD` | Demo account password |
+
+Vite inlines `VITE_*` variables at build time, so **redeploy after adding
+them** — changing them without a rebuild has no effect.
+
+### Backend side
+
+Two backend env vars must reference the deployed frontend origin, or the app
+will load but every request will fail:
+
+- `ALLOWED_ORIGINS` must contain the Vercel origin exactly — scheme included,
+  no trailing slash — otherwise every API call fails CORS preflight.
+- `FRONTEND_URL` must point at it, or completing an OAuth connection redirects
+  the user to the wrong host.
+
+### First load is slow
+
+Render's free tier sleeps after inactivity, so the first request after an idle
+period takes roughly 30 seconds. The demo button and the Integrations page both
+surface a "waking up" message instead of failing silently, but it is worth
+loading the demo link once yourself before sending it to anyone.
 
 ## Project Structure
 
