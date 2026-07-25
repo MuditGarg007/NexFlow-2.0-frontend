@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#050505"/>
+  <circle cx="980" cy="120" r="420" fill="url(#glow)"/>
+  <circle cx="180" cy="560" r="360" fill="url(#glow)"/>
+
+  <g transform="translate(96 150)">
+    <path d="M0 84V0l84 84V0" fill="none" stroke="url(#mark)" stroke-width="16"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="96" y="330" font-family="Inter, Segoe UI, sans-serif" font-size="86"
+        font-weight="700" fill="#FFFFFF" letter-spacing="-2">NexFlow</text>
+  <text x="96" y="398" font-family="Inter, Segoe UI, sans-serif" font-size="34"
+        font-weight="400" fill="rgba(255,255,255,0.62)">Chat with your apps.</text>
+  <text x="96" y="452" font-family="Inter, Segoe UI, sans-serif" font-size="26"
+        font-weight="400" fill="rgba(255,255,255,0.38)">
+    Gmail · Google Calendar · Google Drive · GitHub
+  </text>
+
+  <g transform="translate(96 508)">
+    <rect width="330" height="52" rx="26" fill="rgba(16,185,129,0.12)"
+          stroke="rgba(16,185,129,0.35)"/>
+    <text x="30" y="34" font-family="Inter, Segoe UI, sans-serif" font-size="21"
+          font-weight="500" fill="#34D399">FastAPI · LangGraph · React</text>
+  </g>
+</svg>

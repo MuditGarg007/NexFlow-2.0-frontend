@@ -30,6 +30,7 @@ export default function RegisterPage() {
     <div className="auth-page">
       <div className="bg-glow bg-glow-1" />
       <div className="bg-glow bg-glow-2" />
+      <Link className="auth-home" to="/">← Back to NexFlow</Link>
       <form className="auth-card glass-card" onSubmit={handleSubmit}>
         <h1>Create account</h1>
         <p className="subtitle">Get started with NexFlow</p>

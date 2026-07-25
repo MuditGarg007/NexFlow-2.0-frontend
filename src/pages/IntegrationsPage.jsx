@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { integrations as intApi } from '../services/api';
 import Sidebar from '../components/Sidebar';
 import { chat } from '../services/api';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Github,
@@ -40,6 +40,7 @@ export default function IntegrationsPage() {
   const [toolsLoading, setToolsLoading] = useState({});
   const [conversations, setConversations] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notice, setNotice] = useState('');
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -63,28 +64,36 @@ export default function IntegrationsPage() {
       ]);
       setAllIntegrations(intRes.data);
       setConversations(convRes.data);
-    } catch {} finally {
+    } catch {
+      // A cold-starting backend looks identical to an empty account otherwise.
+      setNotice('Could not reach the server. It may be waking up — reload in a moment.');
+    } finally {
       setLoading(false);
     }
   };
 
   const handleConnect = async (id) => {
     setConnectingId(id);
+    setNotice('');
     try {
       const { data } = await intApi.authorize(id);
       window.location.href = data.authorization_url;
-    } catch {
+    } catch (err) {
+      setNotice(err.response?.data?.detail || 'Could not start the connection. Try again.');
       setConnectingId(null);
     }
   };
 
   const handleDisconnect = async (id) => {
+    setNotice('');
     try {
       await intApi.disconnect(id);
       setAllIntegrations((prev) =>
         prev.map((i) => (i.id === id ? { ...i, is_connected: false } : i))
       );
-    } catch {}
+    } catch (err) {
+      setNotice(err.response?.data?.detail || 'Could not disconnect. Try again.');
+    }
   };
 
   const toggleTools = async (id) => {
@@ -109,7 +118,9 @@ export default function IntegrationsPage() {
     try {
       await chat.deleteConversation(id);
       setConversations((prev) => prev.filter((c) => c.id !== id));
-    } catch {}
+    } catch (err) {
+      setNotice(err.response?.data?.detail || 'Could not delete that conversation.');
+    }
   };
 
   return (
@@ -133,8 +144,24 @@ export default function IntegrationsPage() {
         <div className="integrations-page">
           <div className="integrations-header">
             <h1>Integrations</h1>
-            <p>Connect your apps to let NexFlow work with them</p>
+            <p>
+              Each app connects separately and grants only the access it needs.
+              Connected apps hand their tools to the agent.
+            </p>
           </div>
+
+          {user?.is_demo && (
+            <div className="page-banner">
+              You are signed in to the shared read-only demo. Its apps are already
+              connected, and connecting or disconnecting is disabled.
+            </div>
+          )}
+
+          {notice && (
+            <div className="page-banner is-warning" role="alert">
+              {notice}
+            </div>
+          )}
 
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '60px' }}>
@@ -150,9 +177,14 @@ export default function IntegrationsPage() {
                 };
                 const tools = toolsData[integration.id] || [];
                 const showTools = toolsVisible[integration.id];
+                const isAvailable = integration.status === 'stable';
+                const canManage = isAvailable && !user?.is_demo;
 
                 return (
-                  <div className="integration-card glass-card" key={integration.id}>
+                  <div
+                    className={`integration-card glass-card ${isAvailable ? '' : 'is-unavailable'}`}
+                    key={integration.id}
+                  >
                     <div className="integration-card-header">
                       <div
                         className="integration-icon"
@@ -166,21 +198,42 @@ export default function IntegrationsPage() {
                           <span className="category">{integration.category}</span>
                         )}
                       </div>
+                      {integration.tool_count > 0 && (
+                        <span className="integration-tool-count">
+                          {integration.tool_count} {integration.tool_count === 1 ? 'tool' : 'tools'}
+                        </span>
+                      )}
                     </div>
 
+                    {integration.description && (
+                      <p className="integration-description">{integration.description}</p>
+                    )}
+
                     <div className="integration-status">
-                      <span className={`status-dot ${integration.is_connected ? 'connected' : 'disconnected'}`} />
-                      <span className={`status-text ${integration.is_connected ? 'connected' : 'disconnected'}`}>
-                        {integration.is_connected ? 'Connected' : 'Not connected'}
-                      </span>
+                      {isAvailable ? (
+                        <>
+                          <span className={`status-dot ${integration.is_connected ? 'connected' : 'disconnected'}`} />
+                          <span className={`status-text ${integration.is_connected ? 'connected' : 'disconnected'}`}>
+                            {integration.is_connected ? 'Connected' : 'Not connected'}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="status-text pending">Coming soon</span>
+                      )}
                     </div>
 
                     <div className="integration-actions">
-                      {integration.is_connected ? (
+                      {!isAvailable ? (
+                        <button className="connect-btn connect" disabled>
+                          Not available yet
+                        </button>
+                      ) : integration.is_connected ? (
                         <>
                           <button
                             className="connect-btn disconnect"
                             onClick={() => handleDisconnect(integration.id)}
+                            disabled={!canManage}
+                            title={canManage ? undefined : 'Disabled on the demo account'}
                           >
                             <Unplug size={13} style={{ marginRight: 4 }} />
                             Disconnect
@@ -197,7 +250,8 @@ export default function IntegrationsPage() {
                         <button
                           className="connect-btn connect"
                           onClick={() => handleConnect(integration.id)}
-                          disabled={connectingId === integration.id}
+                          disabled={connectingId === integration.id || !canManage}
+                          title={canManage ? undefined : 'Disabled on the demo account'}
                         >
                           {connectingId === integration.id ? (
                             <Loader2 size={13} className="spin-icon" style={{ marginRight: 4 }} />

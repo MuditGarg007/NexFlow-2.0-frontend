@@ -131,6 +131,19 @@ input, textarea {
   overflow: hidden;
 }
 
+.auth-home {
+  position: absolute;
+  top: 28px;
+  left: 28px;
+  z-index: 2;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.auth-home:hover {
+  color: var(--text-primary);
+}
+
 .auth-page .bg-glow {
   position: absolute;
   width: 500px;
@@ -959,6 +972,69 @@ input, textarea {
   font-size: 12px;
   color: var(--text-muted);
   text-transform: capitalize;
+}
+
+.integration-card-header .integration-info {
+  min-width: 0;
+}
+
+.integration-tool-count {
+  margin-left: auto;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.integration-description {
+  margin-bottom: 16px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.integration-card.is-unavailable {
+  opacity: 0.6;
+}
+
+.integration-card.is-unavailable:hover {
+  transform: none;
+}
+
+.integration-status .status-text.pending {
+  color: var(--warning);
+}
+
+.connect-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.connect-btn:disabled:hover {
+  box-shadow: none;
+}
+
+/* Page-level notice shown above a screen's content. */
+.page-banner {
+  max-width: 900px;
+  margin: 0 auto 20px;
+  padding: 12px 16px;
+  border: 1px solid var(--accent-subtle);
+  border-left: 2px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: rgba(16, 185, 129, 0.06);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.page-banner.is-warning {
+  border-color: rgba(245, 158, 11, 0.25);
+  border-left-color: var(--warning);
+  background: rgba(245, 158, 11, 0.07);
 }
 
 .integration-status {
